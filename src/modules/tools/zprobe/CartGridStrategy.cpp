@@ -454,10 +454,18 @@ void CartGridStrategy::setAdjustFunction(bool on)
 
 bool CartGridStrategy::findBed()
 {
-    if (do_home) zprobe->home();
+    THEKERNEL->streams->printf("DEBUG: finding bed procedure started\n");
+    if (do_home) {
+      zprobe->home();
+      THEKERNEL->streams->printf ("DEBUG: homing\n");
+    }
+
     float z = initial_height;
     zprobe->coordinated_move(NAN, NAN, z, zprobe->getFastFeedrate()); // move Z only to initial_height
+    THEKERNEL->streams->printf("DEBUG: moving Z to %d\n", z);
     zprobe->coordinated_move(x_start - X_PROBE_OFFSET_FROM_EXTRUDER, y_start - Y_PROBE_OFFSET_FROM_EXTRUDER, NAN, zprobe->getFastFeedrate()); // move at initial_height to x_start, y_start
+
+    THEKERNEL->streams->printf("DEBUG: moving head to X %d Y %d", x_start - X_PROBE_OFFSET_FROM_EXTRUDER, y_start - Y_PROBE_OFFSET_FROM_EXTRUDER);
 
     // find bed at 0,0 run at slow rate so as to not hit bed hard
     float mm;
@@ -507,6 +515,8 @@ bool CartGridStrategy::doProbe(Gcode *gc)
         gc->stream->printf("Finding bed failed, check the initial height setting\n");
         return false;
     }
+
+    THEKERNEL->streams->printf("Bed found\n");
 
     gc->stream->printf("Probe start ht is %f mm, rectangular bed width %fmm, height %fmm, grid size is %dx%d\n", zprobe->getProbeHeight(), x_size, y_size, current_grid_x_size, current_grid_y_size);
 
