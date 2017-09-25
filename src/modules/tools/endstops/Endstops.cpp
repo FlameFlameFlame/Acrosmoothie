@@ -350,7 +350,7 @@ bool Endstops::load_config()
             homing_axis.push_back(temp_axis_array[i]);
             //DEBUG
             for (int i = 0 ; i < homing_axis.size(); i++)
-                THEKERNEL->streams->printf("DEBUG from pushing to homing_axis array: for %s axis retract is set to %d\n", 'X' + i, homing_axis[i].retract);
+                THEKERNEL->streams->printf("DEBUG: from pushing to homing_axis array: for %s axis retract is set to %d\n", 'X' + i, homing_axis[i].retract);
         }
     }
 
@@ -499,6 +499,7 @@ void Endstops::back_off_home(axis_bitmap_t axis)
         params.push_back({'F', THEROBOT->from_millimeters(slow_rate * 60.0F)});
         char gcode_buf[64];
         append_parameters(gcode_buf, params, sizeof(gcode_buf));
+        THEKERNEL->streams->printf("Debug: sent G0 with those params: %s\n", gcode_buf);
         Gcode gc(gcode_buf, &(StreamOutput::NullStream));
         THEROBOT->push_state();
         THEROBOT->absolute_mode = false; // needs to be relative mode
@@ -621,10 +622,14 @@ void Endstops::home(axis_bitmap_t a)
 
     // Start moving the axes to the origin
     this->status = MOVING_TO_ENDSTOP_FAST;
+    //THEKERNEL->streams->printf("DEBUG: axis %s is moving to endstop fast\n", this->axis_index);
 
     THEROBOT->disable_segmentation= true; // we must disable segmentation as this won't work with it enabled
 
-    if(!home_z_first) home_xy();
+    if(!home_z_first) {
+        home_xy();
+        THEKERNEL->streams->printf("DEBUG: !home_z_first is triggered\n");
+    }
 
     if(axis_to_home[Z_AXIS]) {
         // now home z
@@ -808,10 +813,12 @@ void Endstops::process_home_command(Gcode* gcode)
 
     } else if(is_corexy) {
         // corexy must home each axis individually
+        THEKERNEL->streams->printf("DEBUG: this is corexy for certain\n");
         for (auto &p : homing_axis) {
             if(haxis[p.axis_index]) {
                 axis_bitmap_t bs;
                 bs.set(p.axis_index);
+                THEKERNEL->streams->printf("Homing %s axis\n", 'X' + p.axis_index);
                 home(bs);
             }
             // check if on_halt (eg kill)
