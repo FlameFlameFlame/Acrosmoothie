@@ -160,7 +160,7 @@ bool Endstops::load_old_config()
 
         // retract in mm
         hinfo.retract= THEKERNEL->config->value(checksums[i][RETRACT])->by_default(5)->as_number();
-        THEKERNEL->streams->printf("DEBUG: for %s X retract was set to %d", 'X'+ i, hinfo.retract);
+        THEKERNEL->streams->printf("DEBUG: for %s axis retract was set to %d", 'X'+ i, hinfo.retract);
 
         // get homing direction and convert to boolean where true is home to min, and false is home to max
         hinfo.home_direction= THEKERNEL->config->value(checksums[i][DIRECTION])->by_default("home_to_min")->as_string() != "home_to_max";
@@ -480,7 +480,7 @@ void Endstops::back_off_home(axis_bitmap_t axis)
     } else {
         // cartesians concatenate all the moves we need to do into one gcode
         for( auto& e : homing_axis) {
-            if(!axis[e.axis_index]) continue; // only for axes we asked to move
+            if(!axis[e.axis_index]) { THEKERNEL->streams->printf ("Skipped axis %s with index %d (index should be 0)", 'X'+e.axis_index, e.axis_index); continue;  }// only for axes we asked to move
 
             // if not triggered no need to move off
             if(e.pin_info != nullptr && e.pin_info->limit_enable && debounced_get(&e.pin_info->pin)) {

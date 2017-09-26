@@ -134,8 +134,8 @@ bool CartGridStrategy::handleConfig()
     only_by_two_corners = THEKERNEL->config->value(leveling_strategy_checksum, cart_grid_leveling_strategy_checksum, only_by_two_corners_checksum)->by_default(false)->as_bool();
     human_readable = THEKERNEL->config->value(leveling_strategy_checksum, cart_grid_leveling_strategy_checksum, human_readable_checksum)->by_default(false)->as_bool();
 
-    this->x_start = 0.0F;
-    this->y_start = 0.0F;
+    this->x_start = 15.0F;
+    this->y_start = 15.0F;
     this->x_size = THEKERNEL->config->value(leveling_strategy_checksum, cart_grid_leveling_strategy_checksum, x_size_checksum)->by_default(0.0F)->as_number();
     this->y_size = THEKERNEL->config->value(leveling_strategy_checksum, cart_grid_leveling_strategy_checksum, y_size_checksum)->by_default(0.0F)->as_number();
     if (this->x_size == 0.0F || this->y_size == 0.0F) {
