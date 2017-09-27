@@ -7,6 +7,7 @@
 *.map
 mri.log
 gdb.txt
+gcc-arm-none-eabi-4_8-2014q1-20140314-win32.zip
 deploy
 debug
 /mbed/src/Debug/

@@ -467,6 +467,7 @@ void Endstops::on_idle(void *argument)
 void Endstops::back_off_home(axis_bitmap_t axis)
 {
     std::vector<std::pair<char, float>> params;
+    std::string temp_bits_string = axis.to_string<char,std::string::traits_type,std::string::allocator_type>();
     this->status = BACK_OFF_HOME;
 
     float slow_rate= NAN; // default mm/sec
@@ -478,9 +479,10 @@ void Endstops::back_off_home(axis_bitmap_t axis)
         slow_rate= homing_axis[Z_AXIS].slow_rate;
 
     } else {
+        THEKERNEL->streams->printf("DEBUG:back_off_home recieved %s as bitset \n", temp_bits_string.c_str());
         // cartesians concatenate all the moves we need to do into one gcode
         for( auto& e : homing_axis) {
-            if(!axis[e.axis_index]) { THEKERNEL->streams->printf ("Skipped axis %s with index %d (index should be 0)", 'X'+e.axis_index, e.axis_index); continue;  }// only for axes we asked to move
+            if(!axis[e.axis_index]) { THEKERNEL->streams->printf ("DEBUG: Skipped axis %s with index %d \n", e.axis, e.axis_index); continue;  }// only for axes we asked to move
 
             // if not triggered no need to move off
             if(e.pin_info != nullptr && e.pin_info->limit_enable && debounced_get(&e.pin_info->pin)) {
@@ -797,19 +799,22 @@ void Endstops::process_home_command(Gcode* gcode)
 
     // do the actual homing
     if(homing_order != 0 && !is_scara) {
-        // if an order has been specified do it in the specified order
-        // homing order is 0bfffeeedddcccbbbaaa where aaa is 1,2,3,4,5,6 to specify the first axis (XYZABC), bbb is the second and ccc is the third etc
-        // eg 0b0101011001010 would be Y X Z A, 011 010 001 100 101 would be  B A X Y Z
-        for (uint32_t m = homing_order; m != 0; m >>= 3) {
-            uint32_t a= (m & 0x07)-1; // axis to home
-            if(a < homing_axis.size() && haxis[a]) { // if axis is selected to home
-                axis_bitmap_t bs;
-                bs.set(a);
-                home(bs);
-            }
-            // check if on_halt (eg kill)
-            if(THEKERNEL->is_halted()) break;
-        }
+        if (!is_corexy)
+        {
+          // if an order has been specified do it in the specified order
+          // homing order is 0bfffeeedddcccbbbaaa where aaa is 1,2,3,4,5,6 to specify the first axis (XYZABC), bbb is the second and ccc is the third etc
+          // eg 0b0101011001010 would be Y X Z A, 011 010 001 100 101 would be  B A X Y Z
+          for (uint32_t m = homing_order; m != 0; m >>= 3) {
+              uint32_t a= (m & 0x07)-1; // axis to home
+              if(a < homing_axis.size() && haxis[a]) { // if axis is selected to home
+                  axis_bitmap_t bs;
+                  bs.set(a);
+                  home(bs);
+              }
+              // check if on_halt (eg kill)
+              if(THEKERNEL->is_halted()) break;
+          }
+        } else THEKERNEL->streams->printf("For corexy printers homing_order override is strictly not recommended\n");
 
     } else if(is_corexy) {
         // corexy must home each axis individually
@@ -818,7 +823,7 @@ void Endstops::process_home_command(Gcode* gcode)
             if(haxis[p.axis_index]) {
                 axis_bitmap_t bs;
                 bs.set(p.axis_index);
-                THEKERNEL->streams->printf("Homing %s axis\n", 'X' + p.axis_index);
+                THEKERNEL->streams->printf("Homing %s axis\n", p.axis);
                 home(bs);
             }
             // check if on_halt (eg kill)
