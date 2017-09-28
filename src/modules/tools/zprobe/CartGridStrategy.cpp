@@ -134,8 +134,12 @@ bool CartGridStrategy::handleConfig()
     only_by_two_corners = THEKERNEL->config->value(leveling_strategy_checksum, cart_grid_leveling_strategy_checksum, only_by_two_corners_checksum)->by_default(false)->as_bool();
     human_readable = THEKERNEL->config->value(leveling_strategy_checksum, cart_grid_leveling_strategy_checksum, human_readable_checksum)->by_default(false)->as_bool();
 
+//Debugg
+
     this->x_start = 15.0F;
     this->y_start = 15.0F;
+  //  this->x_start = 0.0F;
+  //  this->y_start = 0.0F;
     this->x_size = THEKERNEL->config->value(leveling_strategy_checksum, cart_grid_leveling_strategy_checksum, x_size_checksum)->by_default(0.0F)->as_number();
     this->y_size = THEKERNEL->config->value(leveling_strategy_checksum, cart_grid_leveling_strategy_checksum, y_size_checksum)->by_default(0.0F)->as_number();
     if (this->x_size == 0.0F || this->y_size == 0.0F) {
@@ -151,7 +155,8 @@ bool CartGridStrategy::handleConfig()
     {
         std::string po = THEKERNEL->config->value(leveling_strategy_checksum, cart_grid_leveling_strategy_checksum, probe_offsets_checksum)->by_default("0,0,0")->as_string();
         std::vector<float> v = parse_number_list(po.c_str());
-        if(v.size() >= 3) {
+        //change by Timur: changed 3 to 2 because we don't have third parameter
+        if(v.size() >= 2) {
             this->probe_offsets = std::make_tuple(v[0], v[1], v[2]);
         }
     }
@@ -435,9 +440,12 @@ bool CartGridStrategy::handleGcode(Gcode *gcode)
     return false;
 }
 
+
+
 #define X_PROBE_OFFSET_FROM_EXTRUDER std::get<0>(probe_offsets)
 #define Y_PROBE_OFFSET_FROM_EXTRUDER std::get<1>(probe_offsets)
-#define Z_PROBE_OFFSET_FROM_EXTRUDER std::get<2>(probe_offsets)
+//change by Timur: commented the next line
+//#define Z_PROBE_OFFSET_FROM_EXTRUDER std::get<2>(probe_offsets)
 
 void CartGridStrategy::setAdjustFunction(bool on)
 {
