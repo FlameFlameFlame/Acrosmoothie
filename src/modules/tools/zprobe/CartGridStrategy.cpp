@@ -155,10 +155,10 @@ bool CartGridStrategy::handleConfig()
     {
         std::string po = THEKERNEL->config->value(leveling_strategy_checksum, cart_grid_leveling_strategy_checksum, probe_offsets_checksum)->by_default("0,0,0")->as_string();
         std::vector<float> v = parse_number_list(po.c_str());
+        THEKERNEL->streams->printf("DEBUG: offsets from config: %f1.4, %f1.4, %f1.4\n", v[0], v[1], v[2]);
         //change by Timur: changed 3 to 2 because we don't have third parameter
-        if(v.size() >= 2) {
+        //if(v.size() >= 2)
             this->probe_offsets = std::make_tuple(v[0], v[1], v[2]);
-        }
     }
 
     // allocate in AHB0
@@ -444,8 +444,7 @@ bool CartGridStrategy::handleGcode(Gcode *gcode)
 
 #define X_PROBE_OFFSET_FROM_EXTRUDER std::get<0>(probe_offsets)
 #define Y_PROBE_OFFSET_FROM_EXTRUDER std::get<1>(probe_offsets)
-//change by Timur: commented the next line
-//#define Z_PROBE_OFFSET_FROM_EXTRUDER std::get<2>(probe_offsets)
+#define Z_PROBE_OFFSET_FROM_EXTRUDER std::get<2>(probe_offsets)
 
 void CartGridStrategy::setAdjustFunction(bool on)
 {
@@ -463,6 +462,7 @@ void CartGridStrategy::setAdjustFunction(bool on)
 bool CartGridStrategy::findBed()
 {
     THEKERNEL->streams->printf("DEBUG: finding bed procedure started\n");
+    THEKERNEL->streams->printf("DEBUG: loaded offsets are: %f, %f, %f\n", X_PROBE_OFFSET_FROM_EXTRUDER, Y_PROBE_OFFSET_FROM_EXTRUDER, Z_PROBE_OFFSET_FROM_EXTRUDER);
     if (do_home) {
       zprobe->home();
       THEKERNEL->streams->printf ("DEBUG: homing\n");

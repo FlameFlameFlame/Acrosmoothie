@@ -160,7 +160,6 @@ bool Endstops::load_old_config()
 
         // retract in mm
         hinfo.retract= THEKERNEL->config->value(checksums[i][RETRACT])->by_default(5)->as_number();
-        THEKERNEL->streams->printf("DEBUG: for %s axis retract was set to %d", 'X'+ i, hinfo.retract);
 
         // get homing direction and convert to boolean where true is home to min, and false is home to max
         hinfo.home_direction= THEKERNEL->config->value(checksums[i][DIRECTION])->by_default("home_to_min")->as_string() != "home_to_max";
@@ -229,7 +228,6 @@ bool Endstops::load_old_config()
 // Get config using new syntax supports ABC
 bool Endstops::load_config()
 {
-    THEKERNEL->streams->printf("DEBUG: load_config() was called\n" );
     bool limit_enabled= false;
 
     std::array<homing_info_t, k_max_actuators> temp_axis_array; // needs to be at least XYZ, but allow for ABC
@@ -346,12 +344,8 @@ bool Endstops::load_config()
                 //вернуться сюда
             }
 
-        }else{
+        }else
             homing_axis.push_back(temp_axis_array[i]);
-            //DEBUG
-            for (int i = 0 ; i < homing_axis.size(); i++)
-                THEKERNEL->streams->printf("DEBUG: from pushing to homing_axis array: for %s axis retract is set to %d\n", 'X' + i, homing_axis[i].retract);
-        }
     }
 
     // sets some endstop global configs applicable to all endstops
@@ -823,7 +817,7 @@ void Endstops::process_home_command(Gcode* gcode)
             if(haxis[p.axis_index]) {
                 axis_bitmap_t bs;
                 bs.set(p.axis_index);
-                THEKERNEL->streams->printf("Homing %s axis\n", p.axis);
+                THEKERNEL->streams->printf("Homing %d axis\n", p.axis);
                 home(bs);
             }
             // check if on_halt (eg kill)
